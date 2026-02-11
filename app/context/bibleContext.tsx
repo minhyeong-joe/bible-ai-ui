@@ -72,8 +72,6 @@ export function BibleProvider({ children }: { children: ReactNode }) {
         if (value === versionState) {
             return;
         }
-        setBookState("");
-        setChapterState("");
         setVersionState(value);
     };
 

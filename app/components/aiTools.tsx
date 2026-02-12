@@ -1,12 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useBibleContext } from "~/context/bibleContext";
+import { getContextResponse, getReflectionResponse } from "~/services/ai";
+import ReactMarkdown from "react-markdown";
 
 type TabType = "context" | "reflection" | null;
+
+// Fix markdown formatting issues from AI responses
+function normalizeMarkdown(text: string): string {
+  return text
+    // Fix escaped bullet points and dashes
+    .replace(/\\-/g, '-')
+    .replace(/\\\*/g, '*')
+    // Fix bullet points with title on next line: "- \nTitle" -> "- Title"
+    .replace(/^-\s*\n+(.+)/gm, '- $1')
+    // Ensure proper spacing after list items
+    .replace(/^- (.+)$/gm, '- $1\n');
+}
 
 export default function AITools() {
   const [activeTab, setActiveTab] = useState<TabType>(null);
   const [contextContent, setContextContent] = useState<string>("");
   const [reflectionContent, setReflectionContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const { book, chapter, version } = useBibleContext();
+
+  // Clear content when chapter changes
+  useEffect(() => {
+    setContextContent("");
+    setReflectionContent("");
+    setActiveTab(null);
+  }, [book, chapter, version]);
 
   const handleTabClick = async (tab: TabType) => {
     if (tab === null) return;
@@ -16,20 +39,24 @@ export default function AITools() {
     // Only fetch if content hasn't been loaded yet
     if (tab === "context" && !contextContent) {
       setIsLoading(true);
-      // TODO: Replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setContextContent(
-        "This is placeholder content for background and context. Replace this with actual API response.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\nUt enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\n\nExcepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-      );
-      setIsLoading(false);
+      try {
+        const response = await getContextResponse(book, chapter, version);
+        setContextContent(response.response);
+      } catch (error) {
+        console.error("Error fetching context response:", error);
+      } finally {
+        setIsLoading(false);
+      }
     } else if (tab === "reflection" && !reflectionContent) {
       setIsLoading(true);
-      // TODO: Replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setReflectionContent(
-        "These are placeholder reflection questions. Replace this with actual API response.\n\n1. What does this passage teach us about God's character?\n2. How can we apply this teaching in our daily lives?\n3. What questions do you have about this passage?"
-      );
-      setIsLoading(false);
+      try {
+        const response = await getReflectionResponse(book, chapter, version);
+        setReflectionContent(response.response);
+      } catch (error) {
+        console.error("Error fetching reflection response:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -72,9 +99,39 @@ export default function AITools() {
               <p className="text-gray-500 dark:text-gray-400">Loading...</p>
             </div>
           ) : (
-            <div className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
-              {activeTab === "context" && <p>{contextContent}</p>}
-              {activeTab === "reflection" && <p>{reflectionContent}</p>}
+            <div className="text-gray-800 dark:text-gray-200 space-y-4">
+              {activeTab === "context" && (
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => <p className="mb-4 leading-relaxed">{children}</p>,
+                    strong: ({ children }) => <strong className="font-bold text-gray-900 dark:text-white">{children}</strong>,
+                    ul: ({ children }) => <ul className="list-disc list-inside space-y-2 mb-4">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-inside space-y-2 mb-4">{children}</ol>,
+                    li: ({ children }) => <li className="ml-4">{children}</li>,
+                    h1: ({ children }) => <h1 className="text-2xl font-bold mb-4 mt-6">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-xl font-bold mb-3 mt-5">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-lg font-bold mb-2 mt-4">{children}</h3>,
+                  }}
+                >
+                  {normalizeMarkdown(contextContent)}
+                </ReactMarkdown>
+              )}
+              {activeTab === "reflection" && (
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => <p className="mb-4 leading-relaxed">{children}</p>,
+                    strong: ({ children }) => <strong className="font-bold text-gray-900 dark:text-white">{children}</strong>,
+                    ul: ({ children }) => <ul className="list-disc list-inside space-y-2 mb-4">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-inside space-y-2 mb-4">{children}</ol>,
+                    li: ({ children }) => <li className="ml-4">{children}</li>,
+                    h1: ({ children }) => <h1 className="text-2xl font-bold mb-4 mt-6">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-xl font-bold mb-3 mt-5">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-lg font-bold mb-2 mt-4">{children}</h3>,
+                  }}
+                >
+                  {normalizeMarkdown(reflectionContent)}
+                </ReactMarkdown>
+              )}
             </div>
           )}
         </div>

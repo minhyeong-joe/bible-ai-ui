@@ -22,6 +22,7 @@ export default function AITools() {
   const [contextContent, setContextContent] = useState<string>("");
   const [reflectionContent, setReflectionContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { book, chapter, version } = useBibleContext();
 
   // Clear content when chapter changes
@@ -29,6 +30,7 @@ export default function AITools() {
     setContextContent("");
     setReflectionContent("");
     setActiveTab(null);
+    setError(null);
   }, [book, chapter, version]);
 
   const handleTabClick = async (tab: TabType) => {
@@ -39,21 +41,37 @@ export default function AITools() {
     // Only fetch if content hasn't been loaded yet
     if (tab === "context" && !contextContent) {
       setIsLoading(true);
+      setError(null);
       try {
         const response = await getContextResponse(book, chapter, version);
-        setContextContent(response.response);
+        if (response.status >= 200 && response.status < 300) {
+          setContextContent(response.data.response);
+        } else if (response.status >= 400 && response.status < 500) {
+          setError(response.data.error || "Failed to fetch context response.");
+        } else {
+          setError("An unexpected error occurred.");
+        }
       } catch (error) {
         console.error("Error fetching context response:", error);
+        setError("Failed to fetch context response.");
       } finally {
         setIsLoading(false);
       }
     } else if (tab === "reflection" && !reflectionContent) {
       setIsLoading(true);
+      setError(null);
       try {
         const response = await getReflectionResponse(book, chapter, version);
-        setReflectionContent(response.response);
+        if (response.status >= 200 && response.status < 300) {
+          setReflectionContent(response.data.response);
+        } else if (response.status >= 400 && response.status < 500) {
+          setError(response.data.error || "Failed to fetch reflection response.");
+        } else {
+          setError("An unexpected error occurred.");
+        }
       } catch (error) {
         console.error("Error fetching reflection response:", error);
+        setError("Failed to fetch reflection response.");
       } finally {
         setIsLoading(false);
       }
@@ -97,6 +115,10 @@ export default function AITools() {
           {isLoading ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-gray-500 dark:text-gray-400">Loading...</p>
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-red-600 dark:text-red-400">{error}</p>
             </div>
           ) : (
             <div className="text-gray-800 dark:text-gray-200 space-y-4">

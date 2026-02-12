@@ -16,12 +16,13 @@ type SetBookOptions = { pendingChapter?: ChapterSpecifier };
 
 interface BibleContextValue {
     version: string;
+    versionName: string;
     book: string;
     chapter: string;
     versions: BibleVersion[];
     books: Book[];
     chapters: Chapter[];
-    setVersion: (value: string) => void;
+    setVersion: (identifier: string, name: string) => void;
     setBook: (value: string, options?: SetBookOptions) => void;
     setChapter: (value: string) => void;
     setScrollOnNextVerses: (value: boolean) => void;
@@ -56,6 +57,7 @@ const resolveChapterSpecifier = (specifier: ChapterSpecifier, available: Chapter
 
 export function BibleProvider({ children }: { children: ReactNode }) {
     const [versionState, setVersionState] = useState("kjv");
+    const [versionNameState, setVersionNameState] = useState("King James Version");
     const [bookState, setBookState] = useState("");
     const [chapterState, setChapterState] = useState("");
     const [versions, setVersions] = useState<BibleVersion[]>([]);
@@ -67,12 +69,13 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     const [scrollOnNextVerses, setScrollOnNextVerses] = useState(false);
     const pendingChapterRef = useRef<ChapterSpecifier>(null);
 
-    const setVersion = (value: string) => {
+    const setVersion = (identifier: string, name: string) => {
         pendingChapterRef.current = null;
-        if (value === versionState) {
+        if (identifier === versionState) {
             return;
         }
-        setVersionState(value);
+        setVersionState(identifier);
+        setVersionNameState(name);
     };
 
     const setBook = (value: string, options?: SetBookOptions) => {
@@ -218,6 +221,7 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     const value = useMemo(
         () => ({
             version: versionState,
+            versionName: versionNameState,
             book: bookState,
             chapter: chapterState,
             versions,
@@ -234,6 +238,7 @@ export function BibleProvider({ children }: { children: ReactNode }) {
         }),
         [
             versionState,
+            versionNameState,
             bookState,
             chapterState,
             versions,

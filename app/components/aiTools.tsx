@@ -23,7 +23,7 @@ export default function AITools() {
   const [reflectionContent, setReflectionContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { book, chapter, version } = useBibleContext();
+  const { book, chapter, versionName } = useBibleContext();
 
   // Clear content when chapter changes
   useEffect(() => {
@@ -31,7 +31,7 @@ export default function AITools() {
     setReflectionContent("");
     setActiveTab(null);
     setError(null);
-  }, [book, chapter, version]);
+  }, [book, chapter, versionName]);
 
   const handleTabClick = async (tab: TabType) => {
     if (tab === null) return;
@@ -43,7 +43,7 @@ export default function AITools() {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await getContextResponse(book, chapter, version);
+        const response = await getContextResponse(book, chapter, versionName);
         if (response.status >= 200 && response.status < 300) {
           setContextContent(response.data.response);
         } else if (response.status >= 400 && response.status < 500) {
@@ -61,7 +61,7 @@ export default function AITools() {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await getReflectionResponse(book, chapter, version);
+        const response = await getReflectionResponse(book, chapter, versionName);
         if (response.status >= 200 && response.status < 300) {
           setReflectionContent(response.data.response);
         } else if (response.status >= 400 && response.status < 500) {

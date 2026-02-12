@@ -23,7 +23,10 @@ export default function DropdownNavigation() {
             disabled={!versions.length}
             onChange={(e) => {
                 setScrollOnNextVerses(false);
-                setVersion(e.target.value);
+                const selectedVersion = versions.find(v => v.identifier === e.target.value);
+                if (selectedVersion) {
+                    setVersion(selectedVersion.identifier, selectedVersion.name);
+                }
             }}
         >
             <option value="" disabled>

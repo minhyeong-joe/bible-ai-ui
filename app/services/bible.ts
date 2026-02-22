@@ -57,18 +57,12 @@ export interface VersesResponse {
     verses: Verse[];
 }
 
-// bad ones no longer supported by this external API?
-const BAD_VERSIONS = ["ylt", "oeb-cw", "oeb-us", "synodal"]
-const SUPPORTED_LANG_CODE = ["eng", "zh-tw", "zh-cn", "kor"]
 
 const API_BASE_URL = import.meta.env.VITE_BIBLE_API_URL;
 
 const fetchVersions = async (): Promise<BibleVersionResponse> => {
     try {
         const response = await axios.get(API_BASE_URL);
-        response.data.translations = response.data.translations.filter((t: BibleVersion) => {
-            return !BAD_VERSIONS.includes(t.identifier) && SUPPORTED_LANG_CODE.includes(t.language_code);
-        });
         return response.data;
     } catch (error) {
         console.error("Error fetching Bible versions:", error);

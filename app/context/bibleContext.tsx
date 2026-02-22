@@ -69,11 +69,11 @@ const resolveChapterSpecifier = (
 export function BibleProvider({ children }: { children: ReactNode }) {
 	const [versionState, setVersionState] = useLocalStorage(
 		"bible-ai:version",
-		"kjv",
+		"gae",
 	);
 	const [versionNameState, setVersionNameState] = useLocalStorage(
 		"bible-ai:versionName",
-		"King James Version",
+		"개역개정",
 	);
 	const [bookState, setBookState] = useState("");
 	const [chapterState, setChapterState] = useState("");

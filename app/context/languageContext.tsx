@@ -60,7 +60,7 @@ const LanguageContext = createContext<LanguageContextValue | undefined>(
 export function LanguageProvider({ children }: { children: ReactNode }) {
 	const [language, setLanguage] = useLocalStorage<LanguageType>(
 		"bible-ai:language",
-		"English",
+		"한국어",
 	);
 
 	return (

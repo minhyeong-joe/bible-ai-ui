@@ -1,4 +1,5 @@
 import type { Route } from "./+types/home";
+import { useEffect } from "react";
 
 import Header from "~/components/header";
 import SearchBar from "~/components/searchBar";
@@ -7,6 +8,7 @@ import Scripts from "~/components/scripts";
 import ChapterNavigation from "~/components/chapterNavigation";
 import AITools from "~/components/aiTools";
 import { BibleProvider, useBibleContext } from "~/context/bibleContext";
+import { warmUpServer } from "~/services/ai";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -17,6 +19,10 @@ export function meta({}: Route.MetaArgs) {
 
 function HomeContent() {
   const { chapter } = useBibleContext();
+
+  useEffect(() => {
+      warmUpServer();
+  }, []);
 
   return (
     <>

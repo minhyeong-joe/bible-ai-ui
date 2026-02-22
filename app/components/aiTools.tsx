@@ -4,6 +4,9 @@ import { getContextResponse, getReflectionResponse } from "~/services/ai";
 import ReactMarkdown from "react-markdown";
 
 type TabType = "context" | "reflection" | null;
+type LanguageType = "English" | "Spanish" | "Korean" | "Chinese";
+
+const LANGUAGES: LanguageType[] = ["English", "Spanish", "Korean", "Chinese"];
 
 // Fix markdown formatting issues from AI responses
 function normalizeMarkdown(text: string): string {
@@ -19,19 +22,20 @@ function normalizeMarkdown(text: string): string {
 
 export default function AITools() {
   const [activeTab, setActiveTab] = useState<TabType>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageType>("English");
   const [contextContent, setContextContent] = useState<string>("");
   const [reflectionContent, setReflectionContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { book, chapter, versionName } = useBibleContext();
 
-  // Clear content when chapter changes
+  // Clear content when chapter or language changes
   useEffect(() => {
     setContextContent("");
     setReflectionContent("");
     setActiveTab(null);
     setError(null);
-  }, [book, chapter, versionName]);
+  }, [book, chapter, versionName, selectedLanguage]);
 
   const handleTabClick = async (tab: TabType) => {
     if (tab === null) return;
@@ -43,7 +47,7 @@ export default function AITools() {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await getContextResponse(book, chapter, versionName);
+        const response = await getContextResponse(book, chapter, versionName, selectedLanguage);
         if (response.status >= 200 && response.status < 300) {
           setContextContent(response.data.response);
         } else if (response.status >= 400 && response.status < 500) {
@@ -61,7 +65,7 @@ export default function AITools() {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await getReflectionResponse(book, chapter, versionName);
+        const response = await getReflectionResponse(book, chapter, versionName, selectedLanguage);
         if (response.status >= 200 && response.status < 300) {
           setReflectionContent(response.data.response);
         } else if (response.status >= 400 && response.status < 500) {
@@ -80,6 +84,23 @@ export default function AITools() {
 
   return (
     <div className="ai-tools my-8 w-full max-w-4xl">
+      {/* Language Selection */}
+      <div className="flex gap-2 mb-4">
+        {LANGUAGES.map((lang) => (
+          <button
+            key={lang}
+            onClick={() => setSelectedLanguage(lang)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer ${
+              selectedLanguage === lang
+                ? "bg-blue-500 text-white"
+                : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+            }`}
+          >
+            {lang}
+          </button>
+        ))}
+      </div>
+
       {/* Tab Buttons */}
       <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
         <button

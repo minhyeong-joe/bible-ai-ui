@@ -8,13 +8,26 @@ const TYPES = {
     REFLECTION: 'reflection'
 }
 
-const getContextResponse = async (book: string, chapter: string, version: string) => {
+const warmUpServer = async () => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/response`, {
+        await axios.get(`${API_BASE_URL}`, {
+            headers: {
+                'x-api-key': API_KEY
+            }
+        });
+    } catch (error) {
+        console.error("Error warming up server:", error);
+    }
+};
+
+const getContextResponse = async (book: string, chapter: string, version: string, language: string = 'English') => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/api/response`, {
             type: TYPES.CONTEXT,
             book,
             chapter,
-            version
+            version,
+            language
         }, {
             headers: {
                 'x-api-key': API_KEY
@@ -30,13 +43,14 @@ const getContextResponse = async (book: string, chapter: string, version: string
     }
 }
 
-const getReflectionResponse = async (book: string, chapter: string, version: string) => {
+const getReflectionResponse = async (book: string, chapter: string, version: string, language: string = 'English') => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/response`, {
+        const response = await axios.post(`${API_BASE_URL}/api/response`, {
             type: TYPES.REFLECTION,
             book,
             chapter,
-            version
+            version,
+            language
         }, {
             headers: {
                 'x-api-key': API_KEY
@@ -52,4 +66,4 @@ const getReflectionResponse = async (book: string, chapter: string, version: str
     }
 }
 
-export { getContextResponse, getReflectionResponse };
+export { warmUpServer,getContextResponse, getReflectionResponse };

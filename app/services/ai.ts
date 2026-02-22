@@ -8,15 +8,20 @@ const TYPES = {
     REFLECTION: 'reflection'
 }
 
-const warmUpServer = async () => {
-    try {
-        await axios.get(`${API_BASE_URL}`, {
-            headers: {
-                'x-api-key': API_KEY
-            }
-        });
-    } catch (error) {
-        console.error("Error warming up server:", error);
+const WARM_UP_RETRY_DELAY_MS = 5000;
+
+const warmUpServer = async (): Promise<void> => {
+    while (true) {
+        try {
+            await axios.get(`${API_BASE_URL}`, {
+                headers: { 'x-api-key': API_KEY },
+                timeout: 10000,
+            });
+            return; // server is up
+        } catch {
+            console.warn(`Server not ready — retrying in ${WARM_UP_RETRY_DELAY_MS / 1000}s…`);
+            await new Promise((resolve) => setTimeout(resolve, WARM_UP_RETRY_DELAY_MS));
+        }
     }
 };
 

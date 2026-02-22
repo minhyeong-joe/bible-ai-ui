@@ -1,11 +1,12 @@
 import type { Route } from "./+types/home";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import Header from "~/components/header";
 import DropdownNavigation from "~/components/dropdownNavigation";
 import Scripts from "~/components/scripts";
 import ChapterNavigation from "~/components/chapterNavigation";
 import AITools from "~/components/aiTools";
+import LoadingScreen from "~/components/loadingScreen";
 import { BibleProvider, useBibleContext } from "~/context/bibleContext";
 import { LanguageProvider } from "~/context/languageContext";
 import { warmUpServer } from "~/services/ai";
@@ -19,10 +20,6 @@ export function meta({}: Route.MetaArgs) {
 
 function HomeContent() {
 	const { chapter } = useBibleContext();
-
-	useEffect(() => {
-		warmUpServer();
-	}, []);
 
 	return (
 		<>
@@ -38,6 +35,18 @@ function HomeContent() {
 }
 
 export default function Home() {
+	const [isReady, setIsReady] = useState(false);
+
+	useEffect(() => {
+		const initialize = async () => {
+			await warmUpServer();
+			setIsReady(true);
+		};
+		initialize();
+	}, []);
+
+	if (!isReady) return <LoadingScreen />;
+
 	return (
 		<LanguageProvider>
 			<BibleProvider>

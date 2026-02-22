@@ -130,14 +130,21 @@ export default function AITools() {
 					/>
 					{isLoading ? (
 						<div className="flex items-center justify-center h-full">
-							<p className="text-gray-500 dark:text-gray-400">Thinking...</p>
+							<p className="text-gray-500 dark:text-gray-400">
+								{UI_TEXT.aiTools.loading[selectedLanguage]}
+							</p>
 						</div>
 					) : error ? (
 						<div className="flex items-center justify-center h-full">
-							<p className="text-red-600 dark:text-red-400">{error}</p>
+							<p className="text-red-600 dark:text-red-400">
+								{UI_TEXT.aiTools.error[selectedLanguage]}
+							</p>
 						</div>
 					) : (
 						<div className="text-gray-800 dark:text-gray-200 space-y-4">
+							<p className="mb-3 text-red-400 dark:text-red-500 text-sm italic">
+								* {UI_TEXT.aiTools.disclaimer[selectedLanguage]}
+							</p>
 							{activeTab === "context" && (
 								<ReactMarkdown
 									components={{

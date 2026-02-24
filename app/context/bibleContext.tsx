@@ -239,6 +239,7 @@ export function BibleProvider({ children }: { children: ReactNode }) {
 			.finally(() => {
 				if (isMounted) {
 					setIsLoadingVerses(false);
+					console.log(verses);
 				}
 			});
 

@@ -34,15 +34,15 @@ export const UI_TEXT = {
 	},
 	aiTools: {
 		tabs: {
-			context: {
-				English: "Summary & Context",
-				한국어: "요약 및 배경",
-				中文: "摘要与背景",
+			devotion: {
+				English: "Devotional Reflection",
+				한국어: "말씀 묵상",
+				中文: "灵修反思",
 			},
-			reflection: {
-				English: "Reflection Questions",
-				한국어: "묵상 질문",
-				中文: "反思问题",
+			freeForm: {
+				English: "Ask Questions",
+				한국어: "질문하기",
+				中文: "提问",
 			},
 		},
 		disclaimer: {
@@ -61,6 +61,36 @@ export const UI_TEXT = {
 			English: "Failed to fetch AI response. Please try again.",
 			한국어: "AI 응답을 가져오지 못했습니다. 다시 시도해주세요.",
 			中文: "获取 AI 响应失败，请重试。",
+		},
+		refresh: {
+			button: {
+				English: "Refresh",
+				한국어: "새로고침",
+				中文: "刷新",
+			},
+			rateLimit: {
+				English: "Too many refresh requests. Please try again in a few minutes.",
+				한국어: "새로고침 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.",
+				中文: "刷新请求过多，请几分钟后再试。",
+			},
+		},
+		chat: {
+			aiName: "Cutie",
+			welcome: {
+				English: "Hi! I'm Cutie. Ask me anything about this chapter!",
+				한국어: "안녕하세요! 저는 Cutie예요. 이 장에 대해 무엇이든 질문해 주세요!",
+				中文: "你好！我是 Cutie。有关本章的任何问题都可以问我！",
+			},
+			placeholder: {
+				English: "Ask a question about this chapter...",
+				한국어: "이 장에 대해 질문해 보세요...",
+				中文: "提问关于本章的问题...",
+			},
+			send: {
+				English: "Send",
+				한국어: "보내기",
+				中文: "发送",
+			},
 		},
 	},
 } as const;

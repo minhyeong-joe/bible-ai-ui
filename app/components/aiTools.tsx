@@ -20,13 +20,13 @@ function normalizeMarkdown(text: string): string {
 		text
 			// Normalize CRLF so all regexes below only deal with \n
 			.replace(/\r\n/g, "\n")
-			// Fix escaped bullet points and dashes
-			.replace(/\\-/g, "-")
-			.replace(/\\\*/g, "*")
-			// Fix bullet points with title on next line: "- \nTitle" -> "- Title"
-			.replace(/^-[ \t]*\n+(.+)/gm, "- $1")
-			// Same fix for asterisk-style bullets
-			.replace(/^\*[ \t]*\n+(.+)/gm, "- $1")
+			// Convert section heading bullets ("- text" or "- **text**") to h3
+			.replace(/^-[ \t]*(.+)$/gm, (_match, p1) => {
+				const heading = p1.replace(/\*\*/g, "").trim();
+				return `### ${heading}`;
+			})
+			// Insert blank line before and after headings for markdown parsing
+			.replace(/^(### .+)/gm, "\n$1\n")
 	);
 }
 
@@ -45,6 +45,7 @@ const devotionMarkdownComponents = {
 	ol: ({ children }: { children?: React.ReactNode }) => (
 		<ol className="list-decimal list-inside space-y-2 mb-4">{children}</ol>
 	),
+	// Remove custom li renderer, since section separation is now handled by headings
 	li: ({ children }: { children?: React.ReactNode }) => (
 		<li className="ml-4">{children}</li>
 	),
@@ -55,7 +56,9 @@ const devotionMarkdownComponents = {
 		<h2 className="text-xl font-bold mb-3 mt-5">{children}</h2>
 	),
 	h3: ({ children }: { children?: React.ReactNode }) => (
-		<h3 className="text-lg font-bold mb-2 mt-4">{children}</h3>
+		<h3 className="text-lg font-bold mb-3 mt-8 pb-1 border-b border-gray-300 dark:border-gray-600">
+			{children}
+		</h3>
 	),
 	table: ({ children }: { children?: React.ReactNode }) => (
 		<div className="overflow-x-auto mb-4">
@@ -71,7 +74,9 @@ const devotionMarkdownComponents = {
 		<tbody>{children}</tbody>
 	),
 	tr: ({ children }: { children?: React.ReactNode }) => (
-		<tr className="border-b border-gray-300 dark:border-gray-600">{children}</tr>
+		<tr className="border-b border-gray-300 dark:border-gray-600">
+			{children}
+		</tr>
 	),
 	th: ({ children }: { children?: React.ReactNode }) => (
 		<th className="px-4 py-2 text-left font-semibold border-r border-gray-300 dark:border-gray-600 last:border-r-0">
@@ -115,7 +120,9 @@ const chatMarkdownComponents = {
 		<tbody>{children}</tbody>
 	),
 	tr: ({ children }: { children?: React.ReactNode }) => (
-		<tr className="border-b border-gray-400 dark:border-gray-500">{children}</tr>
+		<tr className="border-b border-gray-400 dark:border-gray-500">
+			{children}
+		</tr>
 	),
 	th: ({ children }: { children?: React.ReactNode }) => (
 		<th className="px-3 py-1 text-left font-semibold border-r border-gray-400 dark:border-gray-500 last:border-r-0">
@@ -135,10 +142,16 @@ export default function AITools() {
 	const [contextContent, setContextContent] = useState<string>("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const { book, chapter, versionName, verses: versesResponse } = useBibleContext();
+	const {
+		book,
+		chapter,
+		versionName,
+		verses: versesResponse,
+	} = useBibleContext();
 
 	// Strip verse objects to {verse, text} only to minimize API payload / tokens
-	const strippedVerses = versesResponse?.verses?.map(({ verse, text }) => ({ verse, text })) ?? [];
+	const strippedVerses =
+		versesResponse?.verses?.map(({ verse, text }) => ({ verse, text })) ?? [];
 
 	// Refresh state for devotion tab
 	const REFRESH_COOLDOWN_S = 30;
@@ -201,6 +214,7 @@ export default function AITools() {
 				);
 				if (response.status >= 200 && response.status < 300) {
 					setContextContent(response.data.response);
+					console.log("Context response:", response.data.response);
 				} else if (response.status >= 400 && response.status < 500) {
 					setError(response.data.error || "Failed to fetch context response.");
 				} else {

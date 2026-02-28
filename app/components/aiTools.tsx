@@ -214,7 +214,7 @@ export default function AITools() {
 				);
 				if (response.status >= 200 && response.status < 300) {
 					setContextContent(response.data.response);
-					console.log("Context response:", response.data.response);
+					// console.log("Context response:", response.data.response);
 				} else if (response.status >= 400 && response.status < 500) {
 					setError(response.data.error || "Failed to fetch context response.");
 				} else {
